@@ -1,0 +1,75 @@
+# Import needed libraries
+import sys, os
+import logging
+import pandas as pd
+import numpy as np
+from tools.run_classifier import run_classifier
+
+# Import classifiers
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+
+# Import different cross validation metrics
+from sklearn.model_selection import KFold, StratifiedKFold, LeaveOneOut
+
+# Setup logging for output
+logging.basicConfig(level=logging.DEBUG,
+	format='%(asctime)s - %(module)s - %(levelname)s - %(message)s',
+	datefmt='%m-%d-%y %H:%M')
+
+#########################################
+############ PROCESS ARGS ###############
+#########################################
+import argparse
+
+parser = argparse.ArgumentParser(description='Runs 3 classification ML pipelines')
+parser.add_argument('--input', help='CSV input for algorithm', required=True)
+parser.add_argument('--output', help='output directory', default='.')
+parser.add_argument('--cv', help='Cross validation metric to use', default='LeaveOneOut()')
+
+cli_args = parser.parse_args()
+
+#########################################
+############ Clean the data #############
+#########################################
+
+# Read in the data
+logging.info("Reading input from: {} ...".format(cli_args.input))
+df = pd.read_csv(cli_args.input)
+
+# Binarize response variable to 0/1 if it's not already
+current_responses = list(set(df['outcome'].values))
+response_map = dict(zip(current_responses, [0,1]))
+df['outcome'] = [response_map[val] for val in df['outcome'].values]
+
+
+# Set up the hyperparameters
+model1 = LogisticRegression() # change lambda here if you want
+model2 = SVC(probability=True)
+model3 = RandomForestClassifier(n_estimators=250, n_jobs=-1)
+all_models = [model1, model2, model3]
+
+# Get the cross validation metric
+cv = eval(cli_args.cv)
+
+# Setup our X, y, labels
+y = df['outcome'].values.flatten()
+df = df.drop(['outcome'], axis=1)
+labels = df.columns
+X = df.values
+logging.info("Input data shape: {}".format(X.shape))
+logging.info("Outcome data shape: {}".format(y.shape))
+logging.info("N positive class: {}".format(sum(y)))
+logging.info("N negative class: {}".format(len(y) - sum(y)))
+
+# Iterate over the models we want to use
+all_stats = []
+for model in all_models:
+	stats = run_classifier(model, X, y, cv, labels, cli_args.output)
+	all_stats.append(stats)
+
+# Save the output to a file
+stats_df = pd.DataFrame(all_stats)
+print(stats_df)
+stats_df.to_csv(os.path.join(cli_args.output, "results.csv"), index=False)
