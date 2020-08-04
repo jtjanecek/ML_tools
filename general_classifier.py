@@ -3,6 +3,7 @@ import sys, os
 import logging
 import pandas as pd
 import numpy as np
+from collections import namedtuple
 from tools.run_classifier import run_classifier
 
 # Import classifiers
@@ -21,14 +22,23 @@ logging.basicConfig(level=logging.DEBUG,
 #########################################
 ############ PROCESS ARGS ###############
 #########################################
+USE_CLI = True
+INPUT_DEFAULT = 'data.csv'
+OUTPUT_DEFAULT = '.'
+CV_DEFAULT = 'LeaveOneOut()'
+
 import argparse
 
 parser = argparse.ArgumentParser(description='Runs 3 classification ML pipelines')
-parser.add_argument('--input', help='CSV input for algorithm', required=True)
-parser.add_argument('--output', help='output directory', default='.')
-parser.add_argument('--cv', help='Cross validation metric to use', default='LeaveOneOut()')
+parser.add_argument('--input', help='CSV input for algorithm', required=True, default=INPUT_DEFAULT)
+parser.add_argument('--output', help='output directory', default=OUTPUT_DEFAULT)
+parser.add_argument('--cv', help='Cross validation metric to use', default=CV_DEFAULT)
 
-cli_args = parser.parse_args()
+if USE_CLI:
+	cli_args = parser.parse_args()
+else:
+	cli_args = namedtuple('cli_args', ['input', 'output', 'cv'])
+	cli_args = cli_args(INPUT_DEFAULT, OUTPUT_DEFAULT, CV_DEFAULT)
 
 #########################################
 ############ Clean the data #############
