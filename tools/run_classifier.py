@@ -2,12 +2,12 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import auc, roc_curve
 import logging
-
-RANDOM_STATE = 100
 import random
-random.seed(RANDOM_STATE)
 
 def run_classifier(model, X, y, cv, labels, output_dir) -> dict:
+	# Setup random state
+	RANDOM_STATE = 100
+	random.seed(RANDOM_STATE)
 
 	logging.info("Running {} ...".format(model))
 	
