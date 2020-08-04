@@ -22,7 +22,7 @@ def run_classifier(model, X, y, cv, labels, output_dir) -> dict:
 		logging.debug("Running multiple CV iteration {} / {} ...".format(i+1, num_cv))
 		for train, test in cv.split(X, y):
 			# Fit the model for this split
-			model.random_state = RANDOM_STATE + i + 1
+			model.random_state = RANDOM_STATE
 			model.fit(X[train], y[train])
 			# Predict probability and actual prediction
 			probas_ = model.predict_proba(X[test])
@@ -32,6 +32,7 @@ def run_classifier(model, X, y, cv, labels, output_dir) -> dict:
 			y_tests.append(y[test])
 			predicted_probas.append(probas_[:,1])
 			predicted.append(predicted_)
+			RANDOM_STATE += 1
 
 	##### If our CV is LOO, then we can't generate confidence intervals
 	if 'LeaveOneOut' in str(cv):
