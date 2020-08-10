@@ -82,7 +82,7 @@ for model in all_models:
 
 	for i in range(1000):
 		np.random.shuffle(X)
-		params_per_permute.append([model, X, y, cv, labels, cli_args.output])
+		params_per_permute.append([model, np.array(X), y, cv, labels, cli_args.output])
 
 	# Run them all in parallel
 	# Pass in the function you want to run in parallel, and the params for each time it's run
