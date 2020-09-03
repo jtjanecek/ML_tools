@@ -3,6 +3,8 @@ Collection of general ML tools for a variety of datasets
 
 # Installation
 ```
+git clone https://github.com/jtjanecek/ML_tools
+cd ML_tools
 pip install -r requirements.txt
 ```
 
